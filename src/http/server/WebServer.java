@@ -7,6 +7,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -47,13 +50,10 @@ public class WebServer {
                         remote.getInputStream()));
                 PrintWriter out = new PrintWriter(remote.getOutputStream());
 
-                // read the data sent. We basically ignore it,
-                // stop reading once a blank line is hit. This
-                // blank line signals the end of the client HTTP
-                // headers.
-                String str = ".";
-                while (str != null && !str.equals(""))
-                    str = in.readLine();
+                List<String> requestStr = HttpRequestBuilder.readRequest(in);
+                HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
+                System.out.println(httpRequest);
+
 
                 // Send the response
                 // Send the headers
