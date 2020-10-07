@@ -9,7 +9,7 @@ public class HttpResponse {
     private int statusCode;
     private String reasonPhrase;
     private final HttpMessageHeader httpMessageHeader = new HttpMessageHeader();
-    private List<String> httpResponseBody = new ArrayList<>();
+    private String httpResponseBody;
 
     public String getProtocolVersion() {
         return protocolVersion;
@@ -39,16 +39,12 @@ public class HttpResponse {
         return httpMessageHeader;
     }
 
-    public List<String> getHttpResponseBody() {
-        return new ArrayList<>(httpResponseBody);
+    public String getHttpResponseBody() {
+        return httpResponseBody;
     }
 
-    public void setHttpResponseBody(List<String> httpResponseBody) {
+    public void setHttpResponseBody(String httpResponseBody) {
         this.httpResponseBody = httpResponseBody;
-    }
-
-    public void addHttpResponseBodyLine(String line) {
-        httpResponseBody.add(line);
     }
 
     public String getStatusLine() {

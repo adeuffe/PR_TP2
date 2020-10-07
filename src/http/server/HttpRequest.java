@@ -11,9 +11,9 @@ public class HttpRequest {
     private final String resource;
     private final String protocolVersion;
     private final HttpMessageHeader httpMessageHeader;
-    private final List<String> httpRequestBody;
+    private final String httpRequestBody;
 
-    public HttpRequest(String generalHeader, List<String> requestHeader, List<String> requestBody) {
+    public HttpRequest(String generalHeader, List<String> requestHeader, String requestBody) {
         Pattern pattern = Pattern.compile("([A-Z]*) (.*) (.*)");
         Matcher matcher = pattern.matcher(generalHeader);
         if (matcher.find()) {
@@ -43,8 +43,8 @@ public class HttpRequest {
         return httpMessageHeader;
     }
 
-    public List<String> getHttpRequestBody() {
-        return new ArrayList<>(httpRequestBody);
+    public String getHttpRequestBody() {
+        return httpRequestBody;
     }
 
     @Override

@@ -59,56 +59,74 @@ public class WebServer {
                 HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
                 System.out.println(httpRequest);
 
-                ///// TREATMENT /////
-                HttpResponse httpResponse = new HttpResponse();
-                httpResponse.setProtocolVersion("HTTP/1.0");
-                httpResponse.getHttpMessageHeader().addField("Server", "Bot");
+                if (httpRequest != null) {
+                    ///// TREATMENT /////
+                    HttpResponse httpResponse = new HttpResponse();
+                    httpResponse.setProtocolVersion("HTTP/1.0");
+                    httpResponse.getHttpMessageHeader().addField("Server", "Bot");
 
-                switch (httpRequest.getHttpMethod()) {
-                    case GET: {
-                        List<String> data = readResource(httpRequest.getResource());
-                        long dataLength = getDataLength(data);
-                        httpResponse.setStatusCode(200);
-                        httpResponse.setReasonPhrase("OK");
-                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                        httpResponse.setHttpResponseBody(data);
-                        break;
-                    }
-                    case POST: {
+                    switch (httpRequest.getHttpMethod()) {
+                        case GET: {
+                            String data = readResource(httpRequest.getResource());
+                            long dataLength = getDataLength(data);
+                            httpResponse.setStatusCode(200);
+                            httpResponse.setReasonPhrase("OK");
+                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                            httpResponse.setHttpResponseBody(data);
+                            break;
+                        }
+                        case POST: {
 
-                        break;
+                            break;
+                        }
+                        case PUT: {
+                            boolean isResourceExists = ResourceManager.isResourceExists(httpRequest.getResource());
+                            if (isResourceExists) {
+                                boolean isReplaced = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                                // TODO: What happens if isReplaced == false?
+                                httpResponse.setStatusCode(200);
+                                httpResponse.setReasonPhrase("OK");
+                            } else {
+                                boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                                // TODO: What happens if isCreated == false?
+                                httpResponse.setStatusCode(201);
+                                httpResponse.setReasonPhrase("Created");
+                            }
+                            HttpResponseBuilder.setContentLocation(httpResponse, httpRequest.getResource());
+                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                            break;
+                        }
+                        case HEAD: {
+                            readResource(httpRequest.getResource());
+                            httpResponse.setStatusCode(200);
+                            httpResponse.setReasonPhrase("OK");
+                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                            break;
+                        }
+                        case DELETE: {
+                            boolean deleteSuccess = ResourceManager.deleteResource(httpRequest.getResource());
+                            httpResponse.setStatusCode(200);
+                            httpResponse.setReasonPhrase("OK");
+                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                            String body = "File deleted: " + deleteSuccess + "\n\r";
+                            String data = setHtmlBodyMessage(body);
+                            httpResponse.setHttpResponseBody(data);
+                            break;
+                        }
                     }
-                    case HEAD: {
-                        readResource(httpRequest.getResource());
-                        httpResponse.setStatusCode(200);
-                        httpResponse.setReasonPhrase("OK");
-                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                        break;
-                    }
-                    case DELETE: {
-                        boolean deleteSuccess = ResourceManager.deleteResource(httpRequest.getResource());
-                        httpResponse.setStatusCode(200);
-                        httpResponse.setReasonPhrase("OK");
-                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                        List<String> body = new ArrayList<>();
-                        body.add("File deleted: " + deleteSuccess);
-                        List<String> data = setHtmlBodyMessage(body);
-                        httpResponse.setHttpResponseBody(data);
-                        break;
-                    }
+
+                    ///// RESPONSE - SEND /////
+                    // Send the status line
+                    out.println(httpResponse.getStatusLine());
+                    // Send the response header
+                    httpResponse.getHttpMessageHeader().getFields().forEach((key, value) -> {
+                        out.println(httpResponse.getHttpMessageHeader().getFieldLine(key));
+                    });
+                    // This blank line signals the end of the headers
+                    out.println("");
+                    // Send the response body
+                    out.println(httpResponse.getHttpResponseBody());
                 }
-
-                ///// RESPONSE - SEND /////
-                // Send the status line
-                out.println(httpResponse.getStatusLine());
-                // Send the response header
-                httpResponse.getHttpMessageHeader().getFields().forEach((key, value) -> {
-                    out.println(httpResponse.getHttpMessageHeader().getFieldLine(key));
-                });
-                // This blank line signals the end of the headers
-                out.println("");
-                // Send the response body
-                httpResponse.getHttpResponseBody().forEach(out::println);
                 out.flush();
                 remote.close();
             } catch (Exception e) {
@@ -117,15 +135,12 @@ public class WebServer {
         }
     }
 
-    public static List<String> setHtmlBodyMessage(List<String> body) {
-        List<String> data = new ArrayList<>();
-        data.add("<html>");
-        data.add("  <body>");
-        body.forEach((line) -> {
-            data.add("      " + line);
-        });
-        data.add("  </body>");
-        data.add("</html>");
+    public static String setHtmlBodyMessage(String body) {
+        String data = "<html>";
+        data += "\n\r  <body>";
+        data += "\n\r       " + body;
+        data += "\n\r  </body>";
+        data += "\n\r</html>";
         return data;
     }
 
@@ -133,27 +148,22 @@ public class WebServer {
         return Paths.get("resources");
     }
 
-    public static List<String> readResource(String resource) throws FileNotFoundException {
-        List<String> dataList = new ArrayList<>();
+    public static String readResource(String resource) throws FileNotFoundException {
+        String dataList = "";
         Path resourcesPath = getResourcesPath();
         String resourcePath = Paths.get(resourcesPath.toAbsolutePath().normalize().toString(), resource).toAbsolutePath().normalize().toString();
         File resourceFile = new File(resourcePath);
         Scanner reader = new Scanner(resourceFile);
         while (reader.hasNextLine()) {
             String data = reader.nextLine();
-            dataList.add(data);
+            dataList = dataList.concat(data);
         }
         reader.close();
         return dataList;
     }
 
-    public static long getDataLength(List<String> dataList) {
-        long dataLength = 0;
-        for (String data : dataList) {
-            byte[] byteArray = data.getBytes(StandardCharsets.UTF_8);
-            dataLength += byteArray.length;
-        }
-        return dataLength;
+    public static long getDataLength(String data) {
+        return data.getBytes(StandardCharsets.UTF_8).length;
     }
 
     /**
