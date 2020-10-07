@@ -2,12 +2,16 @@
 
 package http.server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,26 +54,76 @@ public class WebServer {
                         remote.getInputStream()));
                 PrintWriter out = new PrintWriter(remote.getOutputStream());
 
+                ///// REQUEST - READ /////
                 List<String> requestStr = HttpRequestBuilder.readRequest(in);
                 HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
                 System.out.println(httpRequest);
 
+                ///// TREATMENT /////
+                HttpResponse httpResponse = new HttpResponse();
+                httpResponse.setProtocolVersion("HTTP/1.0");
+                httpResponse.getHttpMessageHeader().addField("Server", "Bot");
 
-                // Send the response
-                // Send the headers
-                out.println("HTTP/1.0 200 OK");
-                out.println("Content-Type: text/html");
-                out.println("Server: Bot");
-                // this blank line signals the end of the headers
+                switch (httpRequest.getHttpMethod()) {
+                    case GET: {
+                        List<String> data = readResource(httpRequest.getResource());
+                        long dataLength = getDataLength(data);
+                        httpResponse.setStatusCode(200);
+                        httpResponse.setReasonPhrase("OK");
+                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                        httpResponse.setHttpResponseBody(data);
+                        break;
+                    }
+                    case POST: {
+
+                        break;
+                    }
+                }
+
+                ///// RESPONSE - SEND /////
+                // Send the status line
+                out.println(httpResponse.getStatusLine());
+                // Send the response header
+                httpResponse.getHttpMessageHeader().getFields().forEach((key, value) -> {
+                    out.println(httpResponse.getHttpMessageHeader().getFieldLine(key));
+                });
+                // This blank line signals the end of the headers
                 out.println("");
-                // Send the HTML page
-                out.println("<H1>Welcome to the Ultra Mini-WebServer</H2>");
+                // Send the response body
+                httpResponse.getHttpResponseBody().forEach(out::println);
                 out.flush();
                 remote.close();
             } catch (Exception e) {
                 System.out.println("Error: " + e);
             }
         }
+    }
+
+    public static Path getResourcesPath() {
+        return Paths.get("resources");
+    }
+
+    public static List<String> readResource(String resource) throws FileNotFoundException {
+        List<String> dataList = new ArrayList<>();
+        Path resourcesPath = getResourcesPath();
+        String resourcePath = Paths.get(resourcesPath.toAbsolutePath().normalize().toString(), resource).toAbsolutePath().normalize().toString();
+        File resourceFile = new File(resourcePath);
+        Scanner reader = new Scanner(resourceFile);
+        while (reader.hasNextLine()) {
+            String data = reader.nextLine();
+            dataList.add(data);
+        }
+        reader.close();
+        return dataList;
+    }
+
+    public static long getDataLength(List<String> dataList) {
+        long dataLength = 0;
+        for (String data : dataList) {
+            byte[] byteArray = data.getBytes(StandardCharsets.UTF_8);
+            dataLength += byteArray.length;
+        }
+        return dataLength;
     }
 
     /**

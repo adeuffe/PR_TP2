@@ -9,8 +9,8 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final String resource;
-    private final String protocol;
-    private final HttpRequestHeader httpRequestHeader;
+    private final String protocolVersion;
+    private final HttpMessageHeader httpMessageHeader;
     private final List<String> httpRequestBody;
 
     public HttpRequest(String generalHeader, List<String> requestHeader, List<String> requestBody) {
@@ -19,8 +19,8 @@ public class HttpRequest {
         if (matcher.find()) {
             httpMethod = HttpMethod.valueOf(matcher.group(1));
             resource = matcher.group(2);
-            protocol = matcher.group(3);
-            httpRequestHeader = new HttpRequestHeader(requestHeader);
+            protocolVersion = matcher.group(3);
+            httpMessageHeader = new HttpMessageHeader(requestHeader);
             httpRequestBody = requestBody;
         } else {
             throw new IllegalStateException();
@@ -35,12 +35,12 @@ public class HttpRequest {
         return resource;
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
+    public HttpMessageHeader getHttpMessageHeader() {
+        return httpMessageHeader;
     }
 
     public List<String> getHttpRequestBody() {
@@ -52,8 +52,9 @@ public class HttpRequest {
         return "{"
                 + "httpMethod=" + this.httpMethod + ","
                 + "resource=" + this.resource + ","
-                + "protocol=" + this.protocol + ","
-                + "httpRequestHeader=" + this.httpRequestHeader
+                + "protocolVersion=" + this.protocolVersion + ","
+                + "httpMessageHeader=" + this.httpMessageHeader + ","
+                + "httpRequestBody=" + this.httpRequestBody
                 + "}";
     }
 }

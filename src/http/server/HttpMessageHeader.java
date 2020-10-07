@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HttpRequestHeader {
+public class HttpMessageHeader {
 
     private final Map<String, String> fields = new HashMap<>();
 
-    public HttpRequestHeader(List<String> fields) throws IllegalStateException {
+    public HttpMessageHeader() {}
+
+    public HttpMessageHeader(List<String> fields) throws IllegalStateException {
         super();
         for (String field : fields) {
             try {
@@ -21,7 +23,6 @@ public class HttpRequestHeader {
                     String key = matcher.group(1);
                     String value = matcher.group(2);
                     addField(key, value);
-                    // TODO: Check if an header field always terminate by a final line and not a semi-colon like "charset"
                 } else {
                     throw new IllegalStateException();
                 }
@@ -41,6 +42,10 @@ public class HttpRequestHeader {
 
     public String getField(String keyField) {
         return fields.get(keyField);
+    }
+
+    public String getFieldLine(String keyField) {
+        return keyField + ": " + getField(keyField);
     }
 
     public void addField(String key, String value) {
