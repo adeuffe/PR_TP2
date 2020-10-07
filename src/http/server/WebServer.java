@@ -78,6 +78,13 @@ public class WebServer {
 
                         break;
                     }
+                    case HEAD: {
+                        readResource(httpRequest.getResource());
+                        httpResponse.setStatusCode(200);
+                        httpResponse.setReasonPhrase("OK");
+                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                        break;
+                    }
                 }
 
                 ///// RESPONSE - SEND /////
