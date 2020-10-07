@@ -85,6 +85,17 @@ public class WebServer {
                         HttpResponseBuilder.setContentType(httpResponse, "text/html");
                         break;
                     }
+                    case DELETE: {
+                        boolean deleteSuccess = ResourceManager.deleteResource(httpRequest.getResource());
+                        httpResponse.setStatusCode(200);
+                        httpResponse.setReasonPhrase("OK");
+                        HttpResponseBuilder.setContentType(httpResponse, "text/html");
+                        List<String> body = new ArrayList<>();
+                        body.add("File deleted: " + deleteSuccess);
+                        List<String> data = setHtmlBodyMessage(body);
+                        httpResponse.setHttpResponseBody(data);
+                        break;
+                    }
                 }
 
                 ///// RESPONSE - SEND /////
@@ -104,6 +115,18 @@ public class WebServer {
                 System.out.println("Error: " + e);
             }
         }
+    }
+
+    public static List<String> setHtmlBodyMessage(List<String> body) {
+        List<String> data = new ArrayList<>();
+        data.add("<html>");
+        data.add("  <body>");
+        body.forEach((line) -> {
+            data.add("      " + line);
+        });
+        data.add("  </body>");
+        data.add("</html>");
+        return data;
     }
 
     public static Path getResourcesPath() {
