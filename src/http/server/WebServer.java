@@ -76,7 +76,17 @@ public class WebServer {
                             break;
                         }
                         case POST: {
-
+                            boolean isResourceExists = ResourceManager.isResourceExists(httpRequest.getResource());
+                            if (isResourceExists) {
+                                ResourceManager.appendResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                                httpResponse.setStatusCode(204);
+                                httpResponse.setReasonPhrase("No-Content");
+                            } else {
+                                boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                                // TODO: What happens if isCreated == false?
+                                httpResponse.setStatusCode(201);
+                                httpResponse.setReasonPhrase("Created");
+                            }
                             break;
                         }
                         case PUT: {
@@ -84,8 +94,8 @@ public class WebServer {
                             if (isResourceExists) {
                                 boolean isReplaced = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 // TODO: What happens if isReplaced == false?
-                                httpResponse.setStatusCode(200);
-                                httpResponse.setReasonPhrase("OK");
+                                httpResponse.setStatusCode(204);
+                                httpResponse.setReasonPhrase("No-Content");
                             } else {
                                 boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 // TODO: What happens if isCreated == false?

@@ -34,6 +34,14 @@ public class ResourceManager {
         return isCreated;
     }
 
+    public static void appendResource(String resource, String content) throws IOException {
+        Path resourcePath = getResourcePath(resource);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(resourcePath.toAbsolutePath().normalize().toString(), true));
+        bw.write(content);
+        bw.flush();
+        bw.close();
+    }
+
     public static boolean replaceResource(String resource, String content) throws IOException {
         deleteResource(resource);
         return createResource(resource, content);
