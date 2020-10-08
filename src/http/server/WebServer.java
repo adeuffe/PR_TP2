@@ -5,15 +5,11 @@ package http.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -57,7 +53,6 @@ public class WebServer {
                 ///// REQUEST - READ /////
                 List<String> requestStr = HttpRequestBuilder.readRequest(in);
                 HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
-                System.out.println(httpRequest);
 
                 if (httpRequest != null) {
                     ///// TREATMENT /////
@@ -70,7 +65,6 @@ public class WebServer {
                             String data = readResource(httpRequest.getResource());
                             long dataLength = getDataLength(data);
                             httpResponse.setStatusCode(200);
-                            httpResponse.setReasonPhrase("OK");
                             HttpResponseBuilder.setContentType(httpResponse, "text/html");
                             httpResponse.setHttpResponseBody(data);
                             break;
@@ -80,12 +74,10 @@ public class WebServer {
                             if (isResourceExists) {
                                 ResourceManager.appendResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 httpResponse.setStatusCode(204);
-                                httpResponse.setReasonPhrase("No-Content");
                             } else {
                                 boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 // TODO: What happens if isCreated == false?
                                 httpResponse.setStatusCode(201);
-                                httpResponse.setReasonPhrase("Created");
                             }
                             break;
                         }
@@ -95,12 +87,10 @@ public class WebServer {
                                 boolean isReplaced = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 // TODO: What happens if isReplaced == false?
                                 httpResponse.setStatusCode(204);
-                                httpResponse.setReasonPhrase("No-Content");
                             } else {
                                 boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 // TODO: What happens if isCreated == false?
                                 httpResponse.setStatusCode(201);
-                                httpResponse.setReasonPhrase("Created");
                             }
                             HttpResponseBuilder.setContentLocation(httpResponse, httpRequest.getResource());
                             HttpResponseBuilder.setContentType(httpResponse, "text/html");
@@ -109,18 +99,15 @@ public class WebServer {
                         case HEAD: {
                             readResource(httpRequest.getResource());
                             httpResponse.setStatusCode(200);
-                            httpResponse.setReasonPhrase("OK");
                             HttpResponseBuilder.setContentType(httpResponse, "text/html");
                             break;
                         }
                         case DELETE: {
-                            boolean deleteSuccess = ResourceManager.deleteResource(httpRequest.getResource());
-                            httpResponse.setStatusCode(200);
-                            httpResponse.setReasonPhrase("OK");
-                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                            String body = "File deleted: " + deleteSuccess + "\n\r";
-                            String data = setHtmlBodyMessage(body);
-                            httpResponse.setHttpResponseBody(data);
+                            boolean isDeleted = ResourceManager.deleteResource(httpRequest.getResource());
+                            // TODO: What happens if isDeleted == false?
+                            if (isDeleted) {
+                                httpResponse.setStatusCode(204);
+                            }
                             break;
                         }
                     }
@@ -134,8 +121,10 @@ public class WebServer {
                     });
                     // This blank line signals the end of the headers
                     out.println("");
-                    // Send the response body
-                    out.println(httpResponse.getHttpResponseBody());
+                    if (httpResponse.hasBodySection()) {
+                        // Send the response body
+                        out.println(httpResponse.getHttpResponseBody());
+                    }
                 }
                 out.flush();
                 remote.close();

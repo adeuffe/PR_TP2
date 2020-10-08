@@ -25,14 +25,11 @@ public class HttpResponse {
 
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+        this.reasonPhrase = HttpResponseBuilder.STATUS_CODE.get(statusCode);
     }
 
     public String getReasonPhrase() {
         return reasonPhrase;
-    }
-
-    public void setReasonPhrase(String reasonPhrase) {
-        this.reasonPhrase = reasonPhrase;
     }
 
     public HttpMessageHeader getHttpMessageHeader() {
@@ -49,6 +46,10 @@ public class HttpResponse {
 
     public String getStatusLine() {
         return protocolVersion + " " + statusCode + " " + reasonPhrase;
+    }
+
+    public boolean hasBodySection() {
+        return httpResponseBody != null;
     }
 
     @Override
