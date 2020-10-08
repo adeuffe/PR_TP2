@@ -1,0 +1,7 @@
+resources/
+bin/
+doc/
+lib/
+out/
+.idea/
+**/*.iml
