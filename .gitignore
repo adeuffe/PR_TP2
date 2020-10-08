@@ -4,4 +4,6 @@ doc/
 lib/
 out/
 .idea/
-**/*.iml
+
+*.iml
+*.class
