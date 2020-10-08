@@ -31,7 +31,7 @@ public class HttpRequestBuilder {
         }
         return requestStr;
     }
-    public static HttpRequest buildRequest(List<String> requestStr) {
+    public static HttpRequest buildRequest(List<String> requestStr) throws Exception {
         if (requestStr.isEmpty()) {
             return null;
         }

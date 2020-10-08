@@ -52,16 +52,4 @@ public class HttpResponseBuilder {
         put(504, "Gateway Time-out");
         put(505, "HTTP Version not supported");
     }};
-
-    public static void setContentType(HttpResponse httpResponse, String contentType) {
-        httpResponse.getHttpMessageHeader().addField("Content-Type", contentType);
-    }
-
-    public static void setContentLength(HttpResponse httpResponse, int contentLength) {
-        httpResponse.getHttpMessageHeader().addField("Content-Length", Integer.toString(contentLength));
-    }
-
-    public static void setContentLocation(HttpResponse httpResponse, String location) {
-        httpResponse.getHttpMessageHeader().addField("Content-Location", location);
-    }
 }

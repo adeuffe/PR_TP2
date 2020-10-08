@@ -13,14 +13,14 @@ public class HttpRequest {
     private final HttpMessageHeader httpMessageHeader;
     private final String httpRequestBody;
 
-    public HttpRequest(String generalHeader, List<String> requestHeader, String requestBody) {
+    public HttpRequest(String generalHeader, List<String> requestHeader, String requestBody) throws Exception {
         Pattern pattern = Pattern.compile("([A-Z]*) (.*) (.*)");
         Matcher matcher = pattern.matcher(generalHeader);
         if (matcher.find()) {
             httpMethod = HttpMethod.valueOf(matcher.group(1));
             resource = matcher.group(2);
             protocolVersion = matcher.group(3);
-            httpMessageHeader = new HttpMessageHeader(requestHeader);
+            httpMessageHeader = new HttpMessageHeader(requestHeader, HttpMessageType.REQUEST);
             httpRequestBody = requestBody;
         } else {
             throw new IllegalStateException();

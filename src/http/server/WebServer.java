@@ -1,15 +1,12 @@
-///A Simple Web Server (WebServer.java)
-
 package http.server;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -58,15 +55,14 @@ public class WebServer {
                     ///// TREATMENT /////
                     HttpResponse httpResponse = new HttpResponse();
                     httpResponse.setProtocolVersion("HTTP/1.0");
-                    httpResponse.getHttpMessageHeader().addField("Server", "Bot");
+                    httpResponse.getHttpMessageHeader().addField(HttpResponseHeaderField.SERVER, "Bot");
 
                     switch (httpRequest.getHttpMethod()) {
+                        case HEAD: { /* fall down */ }
                         case GET: {
-                            String data = readResource(httpRequest.getResource());
-                            long dataLength = getDataLength(data);
+                            String content = ResourceManager.readResource(httpRequest.getResource());
                             httpResponse.setStatusCode(200);
-                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                            httpResponse.setHttpResponseBody(data);
+                            httpResponse.setHttpResponseBody(content, "text/html");
                             break;
                         }
                         case POST: {
@@ -75,41 +71,27 @@ public class WebServer {
                                 ResourceManager.appendResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
                                 httpResponse.setStatusCode(204);
                             } else {
-                                boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
-                                // TODO: What happens if isCreated == false?
-                                httpResponse.setStatusCode(201);
+                                WebServer.doResourceAction(httpRequest, httpResponse, ResourceAction.CREATE, 201);
                             }
                             break;
                         }
                         case PUT: {
                             boolean isResourceExists = ResourceManager.isResourceExists(httpRequest.getResource());
                             if (isResourceExists) {
-                                boolean isReplaced = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
-                                // TODO: What happens if isReplaced == false?
-                                httpResponse.setStatusCode(204);
+                                WebServer.doResourceAction(httpRequest, httpResponse, ResourceAction.REPLACE, 204);
                             } else {
-                                boolean isCreated = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
-                                // TODO: What happens if isCreated == false?
-                                httpResponse.setStatusCode(201);
+                                WebServer.doResourceAction(httpRequest, httpResponse, ResourceAction.CREATE, 201);
                             }
-                            HttpResponseBuilder.setContentLocation(httpResponse, httpRequest.getResource());
-                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
-                            break;
-                        }
-                        case HEAD: {
-                            readResource(httpRequest.getResource());
-                            httpResponse.setStatusCode(200);
-                            HttpResponseBuilder.setContentType(httpResponse, "text/html");
                             break;
                         }
                         case DELETE: {
-                            boolean isDeleted = ResourceManager.deleteResource(httpRequest.getResource());
-                            // TODO: What happens if isDeleted == false?
-                            if (isDeleted) {
-                                httpResponse.setStatusCode(204);
-                            }
+                            WebServer.doResourceAction(httpRequest, httpResponse, ResourceAction.DELETE, 204);
                             break;
                         }
+                    }
+
+                    if (httpRequest.getHttpMethod() == HttpMethod.HEAD) {
+                        httpResponse.removeHttpResponseBody();
                     }
 
                     ///// RESPONSE - SEND /////
@@ -134,35 +116,33 @@ public class WebServer {
         }
     }
 
-    public static String setHtmlBodyMessage(String body) {
-        String data = "<html>";
-        data += "\n\r  <body>";
-        data += "\n\r       " + body;
-        data += "\n\r  </body>";
-        data += "\n\r</html>";
-        return data;
-    }
-
-    public static Path getResourcesPath() {
-        return Paths.get("resources");
-    }
-
-    public static String readResource(String resource) throws FileNotFoundException {
-        String dataList = "";
-        Path resourcesPath = getResourcesPath();
-        String resourcePath = Paths.get(resourcesPath.toAbsolutePath().normalize().toString(), resource).toAbsolutePath().normalize().toString();
-        File resourceFile = new File(resourcePath);
-        Scanner reader = new Scanner(resourceFile);
-        while (reader.hasNextLine()) {
-            String data = reader.nextLine();
-            dataList = dataList.concat(data);
+    public static void doResourceAction(HttpRequest httpRequest, HttpResponse httpResponse, ResourceAction resourceAction, int successStatusCode) throws Exception {
+        boolean isDone = false;
+        try {
+            switch (resourceAction) {
+                case CREATE: {
+                    isDone = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                    httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    break;
+                }
+                case REPLACE: {
+                    isDone = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                    httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    break;
+                }
+                case DELETE: {
+                    isDone = ResourceManager.deleteResource(httpRequest.getResource());
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        reader.close();
-        return dataList;
-    }
-
-    public static long getDataLength(String data) {
-        return data.getBytes(StandardCharsets.UTF_8).length;
+        if (isDone) {
+            httpResponse.setStatusCode(successStatusCode);
+        } else {
+            httpResponse.setStatusCode(500);
+        }
     }
 
     /**
