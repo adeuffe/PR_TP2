@@ -44,7 +44,14 @@ public enum HttpRequestHeaderField implements HttpMessageField {
     WARNING("Warning"),
 
     //// Non-standard fields ////
-    POSTMAN_TOKEN("Postman-Token");
+    POSTMAN_TOKEN("Postman-Token"),
+    SEC_CH_UA("sec-ch-ua"),
+    SEC_CH_UA_MOBILE("sec-ch-ua-mobile"),
+    SEC_FETCH_DEST("Sec-Fetch-Dest"),
+    SEC_FETCH_MODE("Sec-Fetch-Mode"),
+    SEC_FETCH_SITE("Sec-Fetch-Site"),
+    SEC_FETCH_USER("Sec-Fetch-User"),
+    UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests");
 
     private final String fieldName;
 

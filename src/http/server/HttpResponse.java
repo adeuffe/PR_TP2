@@ -1,8 +1,6 @@
 package http.server;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class HttpResponse {
 
@@ -10,14 +8,14 @@ public class HttpResponse {
     private int statusCode;
     private String reasonPhrase;
     private final HttpMessageHeader httpMessageHeader;
-    private String httpResponseBody;
+    private byte[] content;
 
     public HttpResponse() {
         this.httpMessageHeader = new HttpMessageHeader(HttpMessageType.RESPONSE);
     }
 
     public String getProtocolVersion() {
-        return protocolVersion;
+        return this.protocolVersion;
     }
 
     public void setProtocolVersion(String protocolVersion) {
@@ -25,7 +23,7 @@ public class HttpResponse {
     }
 
     public int getStatusCode() {
-        return statusCode;
+        return this.statusCode;
     }
 
     public void setStatusCode(int statusCode) {
@@ -34,34 +32,34 @@ public class HttpResponse {
     }
 
     public String getReasonPhrase() {
-        return reasonPhrase;
+        return this.reasonPhrase;
     }
 
     public HttpMessageHeader getHttpMessageHeader() {
-        return httpMessageHeader;
+        return this.httpMessageHeader;
     }
 
-    public String getHttpResponseBody() {
-        return httpResponseBody;
+    public byte[] getContent() {
+        return this.content;
     }
 
-    public void setHttpResponseBody(String httpResponseBody, String contentType) {
-        int contentLength = httpResponseBody.getBytes(StandardCharsets.UTF_8).length;
+    public void setContent(byte[] content, String contentType) {
+        int contentLength = content.length;
         this.addHeaderField(HttpResponseHeaderField.CONTENT_TYPE, contentType);
         this.addHeaderField(HttpResponseHeaderField.CONTENT_LENGTH, Integer.toString(contentLength));
-        this.httpResponseBody = httpResponseBody;
+        this.content = content;
     }
 
-    public void removeHttpResponseBody() {
-        this.httpResponseBody = null;
+    public void removeContent() {
+        this.content = null;
     }
 
     public String getStatusLine() {
-        return protocolVersion + " " + statusCode + " " + reasonPhrase;
+        return this.protocolVersion + " " + this.statusCode + " " + this.reasonPhrase + "\r\n";
     }
 
     public boolean hasBodySection() {
-        return httpResponseBody != null;
+        return this.content != null;
     }
 
     public void addHeaderField(HttpMessageField httpMessageField, String value) {
@@ -71,11 +69,11 @@ public class HttpResponse {
     @Override
     public String toString() {
         return "{"
-                + "protocolVersion=" + protocolVersion + ","
-                + "statusCode=" + statusCode + ","
-                + "reasonPhrase=" + reasonPhrase + ","
-                + "httpMessageHeader=" + httpMessageHeader + ","
-                + "httpResponseBody=" + httpResponseBody
+                + "protocolVersion=" + this.protocolVersion + ","
+                + "statusCode=" + this.statusCode + ","
+                + "reasonPhrase=" + this.reasonPhrase + ","
+                + "httpMessageHeader=" + this.httpMessageHeader + ","
+                + "content=" + new String(this.content)
                 + "}";
     }
 }

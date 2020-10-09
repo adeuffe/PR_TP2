@@ -1,9 +1,6 @@
 package http.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -37,7 +34,7 @@ public class WebServer {
         }
 
         System.out.println("Waiting for connection");
-        for (; ; ) {
+        for (;;) {
             try {
                 // wait for a connection
                 Socket remote = s.accept();
@@ -45,7 +42,7 @@ public class WebServer {
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
-                PrintWriter out = new PrintWriter(remote.getOutputStream());
+                OutputStream out = remote.getOutputStream();
 
                 ///// REQUEST - READ /////
                 List<String> requestStr = HttpRequestBuilder.readRequest(in);
@@ -60,9 +57,14 @@ public class WebServer {
                     switch (httpRequest.getHttpMethod()) {
                         case HEAD: { /* fall down */ }
                         case GET: {
-                            String content = ResourceManager.readResource(httpRequest.getResource());
-                            httpResponse.setStatusCode(200);
-                            httpResponse.setHttpResponseBody(content, "text/html");
+                            byte[] content = ResourceManager.readResource(httpRequest.getResource());
+                            String contentType = HttpResponseBuilder.getContentType(httpRequest.getResource());
+                            if (contentType != null) {
+                                httpResponse.setStatusCode(200);
+                                httpResponse.setContent(content, contentType);
+                            } else {
+                                httpResponse.setStatusCode(416);
+                            }
                             break;
                         }
                         case POST: {
@@ -91,32 +93,39 @@ public class WebServer {
                     }
 
                     if (httpRequest.getHttpMethod() == HttpMethod.HEAD) {
-                        httpResponse.removeHttpResponseBody();
+                        httpResponse.removeContent();
                     }
 
                     ///// RESPONSE - SEND /////
                     // Send the status line
-                    out.println(httpResponse.getStatusLine());
+                    System.out.println("Sent response:");
+                    out.write(httpResponse.getStatusLine().getBytes());
+                    System.out.print(httpResponse.getStatusLine());
                     // Send the response header
-                    httpResponse.getHttpMessageHeader().getFields().forEach((key, value) -> {
-                        out.println(httpResponse.getHttpMessageHeader().getFieldLine(key));
-                    });
+                    for (String keyField : httpResponse.getHttpMessageHeader().getFields().keySet()) {
+                        out.write(httpResponse.getHttpMessageHeader().getFieldLine(keyField).getBytes());
+                        System.out.print(httpResponse.getHttpMessageHeader().getFieldLine(keyField));
+                    }
                     // This blank line signals the end of the headers
-                    out.println("");
+                    out.write("\r\n".getBytes());
+                    System.out.println();
                     if (httpResponse.hasBodySection()) {
                         // Send the response body
-                        out.println(httpResponse.getHttpResponseBody());
+                        out.write(httpResponse.getContent());
+                        System.out.println("<The body>");
                     }
                 }
                 out.flush();
                 remote.close();
+                System.out.println("Disconnection, wait an other connection...");
+                System.out.println();
             } catch (Exception e) {
                 System.out.println("Error: " + e);
             }
         }
     }
 
-    public static void doResourceAction(HttpRequest httpRequest, HttpResponse httpResponse, ResourceAction resourceAction, int successStatusCode) throws Exception {
+    public static void doResourceAction(HttpRequest httpRequest, HttpResponse httpResponse, ResourceAction resourceAction, int successStatusCode) {
         boolean isDone = false;
         try {
             switch (resourceAction) {

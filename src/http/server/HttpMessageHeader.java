@@ -59,7 +59,7 @@ public class HttpMessageHeader {
     }
 
     public String getFieldLine(String keyField) {
-        return keyField + ": " + this.getField(keyField);
+        return keyField + ": " + this.getField(keyField) + "\r\n";
     }
 
     public void addField(String key, String value) throws Exception {

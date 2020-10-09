@@ -52,4 +52,54 @@ public class HttpResponseBuilder {
         put(504, "Gateway Time-out");
         put(505, "HTTP Version not supported");
     }};
+
+    public static final Map<String, String> MIME = new HashMap<String, String>() {{
+        put("bin", "application/octet-stream");
+        put("css", "text/css");
+        put("csv", "text/csv");
+        put("doc", "application/msword");
+        put("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        put("eot", "application/vnd.ms-fontobject");
+        put("gif", "image/gif");
+        put("htm", "text/html");
+        put("html", "text/html");
+        put("ico", "image/x-icon");
+        put("jar", "application/java-archive");
+        put("jpeg", "image/jpeg");
+        put("jpg", "image/jpeg");
+        put("js", "application/javascript");
+        put("json", "application/json");
+        put("mpeg", "video/mpeg");
+        put("mp4", "video/mp4");
+        put("otf", "font/otf");
+        put("png", "image/png");
+        put("pdf", "application/pdf");
+        put("ppt", "application/vnd.ms-powerpoint");
+        put("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        put("rar", "application/x-rar-compressed");
+        put("sh", "application/x-sh");
+        put("svg", "image/svg+xml");
+        put("tar", "application/x-tar");
+        put("tif", "image/tiff");
+        put("tiff", "image/tiff");
+        put("ts", "application/typescript");
+        put("ttf", "font/ttf");
+        put("woff", "font/woff");
+        put("woff2", "font/woff2");
+        put("xhtml", "application/xhtml+xml");
+        put("xls", "application/vnd.ms-excel");
+        put("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        put("xml", "application/xml");
+        put("zip", "application/zip");
+        put("7z", "application/x-7z-compressed");
+    }};
+
+    public static String getContentType(String resource) {
+        String extension = resource.substring(resource.indexOf(".") + 1);
+        String contentType = null;
+        if (MIME.containsKey(extension)) {
+            contentType = MIME.get(extension);
+        }
+        return contentType;
+    }
 }

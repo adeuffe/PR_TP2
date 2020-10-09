@@ -1,10 +1,11 @@
 package http.server;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Scanner;
+import java.util.Base64;
 
 public class ResourceManager {
 
@@ -24,18 +25,8 @@ public class ResourceManager {
         return resourceFile.exists();
     }
 
-    public static String readResource(String resource) throws FileNotFoundException {
-        String dataList = "";
-        Path resourcesPath = getResourcesPath();
-        String resourcePath = Paths.get(resourcesPath.toAbsolutePath().normalize().toString(), resource).toAbsolutePath().normalize().toString();
-        File resourceFile = new File(resourcePath);
-        Scanner reader = new Scanner(resourceFile);
-        while (reader.hasNextLine()) {
-            String data = reader.nextLine();
-            dataList = dataList.concat(data);
-        }
-        reader.close();
-        return dataList;
+    public static byte[] readResource(String resource) throws IOException {
+        return Files.readAllBytes(getResourcePath(resource));
     }
 
     public static boolean createResource(String resource, String content) throws IOException {
