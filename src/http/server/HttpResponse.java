@@ -1,7 +1,5 @@
 package http.server;
 
-import java.util.Arrays;
-
 public class HttpResponse {
 
     private String protocolVersion;

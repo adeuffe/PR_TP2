@@ -7,8 +7,8 @@ public class HttpResponseBuilder {
 
     public static final Map<Integer, String> STATUS_CODE = new HashMap<Integer, String>() {{
         // 1XX
-        put (100, "Continue");
-        put (101, "Switching Protocols");
+        put(100, "Continue");
+        put(101, "Switching Protocols");
         // 2XX
         put(200, "OK");
         put(201, "Created");

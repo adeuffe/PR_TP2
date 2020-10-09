@@ -1,6 +1,9 @@
 package http.server;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -34,7 +37,7 @@ public class WebServer {
         }
 
         System.out.println("Waiting for connection");
-        for (;;) {
+        for (; ; ) {
             try {
                 // wait for a connection
                 Socket remote = s.accept();
