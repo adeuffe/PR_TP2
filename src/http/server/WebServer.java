@@ -9,19 +9,15 @@ import java.net.Socket;
 import java.util.List;
 
 /**
- * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
- * Java Copyright 2001 by Jeff Heaton
- * <p>
- * WebServer is a very simple web-server. Any request is responded with a very
- * simple web-page.
+ * The HTTP server
  *
- * @author Jeff Heaton
- * @version 1.0
+ * @author Loïc DUBOIS-TERMOZ
+ * @author Alexandre DUFOUR
  */
 public class WebServer {
 
     /**
-     * WebServer constructor.
+     * WebServer constructor
      */
     protected void start() {
         ServerSocket s;
@@ -43,8 +39,7 @@ public class WebServer {
                 Socket remote = s.accept();
                 // remote is now the connected socket
                 System.out.println("Connection, sending data.");
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        remote.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
                 OutputStream out = remote.getOutputStream();
 
                 ///// REQUEST - READ /////
@@ -73,7 +68,7 @@ public class WebServer {
                         case POST: {
                             boolean isResourceExists = ResourceManager.isResourceExists(httpRequest.getResource());
                             if (isResourceExists) {
-                                ResourceManager.appendResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
+                                ResourceManager.appendResource(httpRequest.getResource(), httpRequest.getContent());
                                 httpResponse.setStatusCode(204);
                             } else {
                                 WebServer.doResourceAction(httpRequest, httpResponse, ResourceAction.CREATE, 201);
@@ -96,7 +91,7 @@ public class WebServer {
                     }
 
                     if (httpRequest.getHttpMethod() == HttpMethod.HEAD) {
-                        httpResponse.removeContent();
+                        httpResponse.removeContentOnly();
                     }
 
                     ///// RESPONSE - SEND /////
@@ -128,18 +123,34 @@ public class WebServer {
         }
     }
 
+    /**
+     * Does a resource action among the list of {@link ResourceAction} available
+     *
+     * @param httpRequest the HTTP request
+     * @param httpResponse the HTTP response to update
+     * @param resourceAction the resource action to realize
+     * @param successStatusCode the status code to set if the actions is realized successfully
+     */
     public static void doResourceAction(HttpRequest httpRequest, HttpResponse httpResponse, ResourceAction resourceAction, int successStatusCode) {
         boolean isDone = false;
         try {
             switch (resourceAction) {
                 case CREATE: {
-                    isDone = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
-                    httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    isDone = ResourceManager.createResource(httpRequest.getResource(), httpRequest.getContent());
+                    try {
+                        httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    } catch (Exception e) {
+                        /* ignored, will never happen */
+                    }
                     break;
                 }
                 case REPLACE: {
-                    isDone = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getHttpRequestBody());
-                    httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    isDone = ResourceManager.replaceResource(httpRequest.getResource(), httpRequest.getContent());
+                    try {
+                        httpResponse.addHeaderField(HttpResponseHeaderField.CONTENT_LOCATION, httpRequest.getResource());
+                    } catch (Exception e) {
+                        /* ignored, will never happen */
+                    }
                     break;
                 }
                 case DELETE: {

@@ -1,5 +1,11 @@
 package http.server;
 
+/**
+ * This enum represents the list of header fields for an HTTP response
+ *
+ * @author Loïc DUBOIS-TERMOZ
+ * @author Alexandre DUFOUR
+ */
 public enum HttpResponseHeaderField implements HttpMessageField {
 
     ACCEPT_PATCH("Accept-Patch"),
@@ -51,10 +57,21 @@ public enum HttpResponseHeaderField implements HttpMessageField {
 
     private final String fieldName;
 
+    /**
+     * The constructor of an instance of this enum
+     *
+     * @param fieldName the name of the header field
+     */
     HttpResponseHeaderField(String fieldName) {
         this.fieldName = fieldName;
     }
 
+    /**
+     * Searches and returns the instance of this enum that correspond to the specified field name if exists
+     *
+     * @param fieldName the name of the targeted field
+     * @return the instance of this enum that correspond to the specified field name if exists, null otherwise
+     */
     public static HttpResponseHeaderField getFieldFromName(String fieldName) {
         for (HttpResponseHeaderField httpResponseHeaderField : HttpResponseHeaderField.values()) {
             if (httpResponseHeaderField.fieldName.equalsIgnoreCase(fieldName)) {

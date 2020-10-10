@@ -1,5 +1,11 @@
 package http.server;
 
+/**
+ * This enum represents the list of header fields for an HTTP request
+ *
+ * @author Loïc DUBOIS-TERMOZ
+ * @author Alexandre DUFOUR
+ */
 public enum HttpRequestHeaderField implements HttpMessageField {
 
     A_IM("A-IM"),
@@ -55,10 +61,21 @@ public enum HttpRequestHeaderField implements HttpMessageField {
 
     private final String fieldName;
 
+    /**
+     * The constructor of an instance of this enum
+     *
+     * @param fieldName the name of the header field
+     */
     HttpRequestHeaderField(String fieldName) {
         this.fieldName = fieldName;
     }
 
+    /**
+     * Searches and returns the instance of this enum that correspond to the specified field name if exists
+     *
+     * @param fieldName the name of the targeted field
+     * @return the instance of this enum that correspond to the specified field name if exists, null otherwise
+     */
     public static HttpRequestHeaderField getFieldFromName(String fieldName) {
         for (HttpRequestHeaderField httpRequestHeaderField : HttpRequestHeaderField.values()) {
             if (httpRequestHeaderField.fieldName.equalsIgnoreCase(fieldName)) {

@@ -3,8 +3,17 @@ package http.server;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is a controller for building an HTTP response
+ *
+ * @author Loïc DUBOIS-TERMOZ
+ * @author Alexandre DUFOUR
+ */
 public class HttpResponseBuilder {
 
+    /**
+     * The list of associations between a status code and it reason phrase
+     */
     public static final Map<Integer, String> STATUS_CODE = new HashMap<Integer, String>() {{
         // 1XX
         put(100, "Continue");
@@ -53,6 +62,9 @@ public class HttpResponseBuilder {
         put(505, "HTTP Version not supported");
     }};
 
+    /**
+     * The list of MIME types supported by this HTTP server
+     */
     public static final Map<String, String> MIME = new HashMap<String, String>() {{
         put("bin", "application/octet-stream");
         put("css", "text/css");
@@ -94,6 +106,12 @@ public class HttpResponseBuilder {
         put("7z", "application/x-7z-compressed");
     }};
 
+    /**
+     * Gets and returns the content type of the specified resource from it extension
+     *
+     * @param resource the resource URI
+     * @return the content type of the specified resource
+     */
     public static String getContentType(String resource) {
         String extension = resource.substring(resource.indexOf(".") + 1);
         String contentType = null;
