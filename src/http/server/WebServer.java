@@ -126,9 +126,9 @@ public class WebServer {
     /**
      * Does a resource action among the list of {@link ResourceAction} available
      *
-     * @param httpRequest the HTTP request
-     * @param httpResponse the HTTP response to update
-     * @param resourceAction the resource action to realize
+     * @param httpRequest       the HTTP request
+     * @param httpResponse      the HTTP response to update
+     * @param resourceAction    the resource action to realize
      * @param successStatusCode the status code to set if the actions is realized successfully
      */
     public static void doResourceAction(HttpRequest httpRequest, HttpResponse httpResponse, ResourceAction resourceAction, int successStatusCode) {

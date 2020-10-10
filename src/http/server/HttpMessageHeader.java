@@ -32,7 +32,7 @@ public class HttpMessageHeader {
      * The fields lines specified in parameters are check before added in the object and if the format is not
      * the one expected an exception is raises
      *
-     * @param fieldsLines the fields lines where each field line must have the format (.*): (.*) to be valid
+     * @param fieldsLines     the fields lines where each field line must have the format (.*): (.*) to be valid
      * @param httpMessageType the HTTP message type (RESPONSE or REQUEST) associated with this header
      * @throws Exception if the field is invalid (wrong format or unknown field)
      */
@@ -108,7 +108,7 @@ public class HttpMessageHeader {
     /**
      * Adds the field (key + value) to this header if it's a valid field header
      *
-     * @param key the key of the field to add to this header
+     * @param key   the key of the field to add to this header
      * @param value the value of the field to add to this header
      * @throws Exception if the field key is unknown for the server
      */
@@ -129,12 +129,12 @@ public class HttpMessageHeader {
      * Adds the field (key + value) to this header if the specified HTTP message field enum instance isn't wrong
      *
      * @param httpMessageField the HTTP message field to add to this header if has the good instance
-     * @param value the value of the field to add to this header
+     * @param value            the value of the field to add to this header
      * @throws Exception if the HTTP message field enum instance is wrong
      */
     public void addField(HttpMessageField httpMessageField, String value) throws Exception {
         if (this.httpMessageType == HttpMessageType.REQUEST && httpMessageField instanceof HttpResponseHeaderField
-            || this.httpMessageType == HttpMessageType.RESPONSE && httpMessageField instanceof HttpRequestHeaderField) {
+                || this.httpMessageType == HttpMessageType.RESPONSE && httpMessageField instanceof HttpRequestHeaderField) {
             throw new Exception("The specified HTTP message field object is instance of the wrong enum");
         }
         this.fields.put(httpMessageField.getFieldName(), value);

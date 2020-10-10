@@ -59,7 +59,7 @@ public class ResourceManager {
      * successfully, "false" otherwise
      *
      * @param resource the resource path relative to the resources directory of this HTTP server
-     * @param content the content to insert into the created resource
+     * @param content  the content to insert into the created resource
      * @return "true" if the creation of the resource happen successfully, "false" otherwise
      * @throws IOException if an I/O exception is raised during the creation process
      */
@@ -79,7 +79,7 @@ public class ResourceManager {
      * successfully, "false" otherwise
      *
      * @param resource the resource path relative to the resources directory of this HTTP server
-     * @param content the content to insert into the replaced resource
+     * @param content  the content to insert into the replaced resource
      * @return "true" if the creation of the resource happen successfully, "false" otherwise
      * @throws IOException if an I/O exception is raised during the re-creation process
      */
@@ -92,7 +92,7 @@ public class ResourceManager {
      * Append to the targeted resource the specified content
      *
      * @param resource the resource path relative to the resources directory of this HTTP server
-     * @param content the content to append to the targeted resource
+     * @param content  the content to append to the targeted resource
      * @throws IOException if an I/O exception is raised during the append process
      */
     public static void appendResource(String resource, String content) throws IOException {

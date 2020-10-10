@@ -21,9 +21,9 @@ public class HttpRequest {
     /**
      * The constructor of an HTTP request
      *
-     * @param requestLine the request line that correspond to the first line of the HTTP request
+     * @param requestLine   the request line that correspond to the first line of the HTTP request
      * @param requestHeader the header section of the HTTP request
-     * @param requestBody the body section of the HTTP request
+     * @param requestBody   the body section of the HTTP request
      * @throws Exception if there's something wrong with general header or header section
      */
     public HttpRequest(String requestLine, List<String> requestHeader, String requestBody) throws Exception {

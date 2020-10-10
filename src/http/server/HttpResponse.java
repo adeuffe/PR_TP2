@@ -88,7 +88,7 @@ public class HttpResponse {
     /**
      * Sets the body content of this HTTP response
      *
-     * @param content the new body content of this HTTP response
+     * @param content     the new body content of this HTTP response
      * @param contentType the content type of the specified body content
      */
     public void setContent(byte[] content, String contentType) {
@@ -131,7 +131,7 @@ public class HttpResponse {
      * Adds the specified header field to this HTTP response
      *
      * @param httpMessageField the field to add to this HTTP response
-     * @param value the value of the field
+     * @param value            the value of the field
      * @throws Exception if the specified field is valid only for HTTP requests
      */
     public void addHeaderField(HttpMessageField httpMessageField, String value) throws Exception {
