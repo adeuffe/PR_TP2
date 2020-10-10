@@ -51,6 +51,7 @@ public enum HttpRequestHeaderField implements HttpMessageField {
 
     //// Non-standard fields ////
     POSTMAN_TOKEN("Postman-Token"),
+    PURPOSE("Purpose"),
     SEC_CH_UA("sec-ch-ua"),
     SEC_CH_UA_MOBILE("sec-ch-ua-mobile"),
     SEC_FETCH_DEST("Sec-Fetch-Dest"),

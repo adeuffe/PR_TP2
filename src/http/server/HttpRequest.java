@@ -31,7 +31,11 @@ public class HttpRequest {
         Matcher matcher = pattern.matcher(requestLine);
         if (matcher.find()) {
             httpMethod = HttpMethod.valueOf(matcher.group(1));
-            resource = matcher.group(2);
+            String resource = matcher.group(2);
+            if (resource.equalsIgnoreCase("/")) {
+                resource += "index.html";
+            }
+            this.resource = resource;
             protocolVersion = matcher.group(3);
             header = new HttpMessageHeader(requestHeader, HttpMessageType.REQUEST);
             content = requestBody;

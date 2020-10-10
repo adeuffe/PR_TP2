@@ -30,8 +30,6 @@ public class HttpRequestBuilder {
             Matcher matcher = pattern.matcher(line);
             if (matcher.find() && matcher.group(1).equalsIgnoreCase("Content-Length")) {
                 length = Integer.parseInt(matcher.group(2));
-            } else {
-                throw new Exception("Invalid HTTP request header format: expected a field but found: " + line);
             }
             requestStr.add(line);
             line = in.readLine();

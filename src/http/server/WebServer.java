@@ -52,18 +52,23 @@ public class WebServer {
             BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
             OutputStream out = remote.getOutputStream();
 
-            List<String> requestStr = HttpRequestBuilder.readRequest(in);
-            HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setStatusCode(500);
+            httpResponse.setProtocolVersion("HTTP/1.0");
+            httpResponse.getHttpMessageHeader().addField(HttpResponseHeaderField.SERVER, "Bot");
+            try {
+                List<String> requestStr = HttpRequestBuilder.readRequest(in);
+                HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
+                System.out.println(httpRequest);
 
-            if (httpRequest != null) {
-                HttpResponse httpResponse = new HttpResponse();
-                try {
+                if (httpRequest != null) {
                     treatRequest(httpRequest, httpResponse);
-                } catch (Exception e) {
-                    httpResponse.setStatusCode(500);
                 }
-                sendResponse(httpResponse, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+                httpResponse.setStatusCode(500);
             }
+            sendResponse(httpResponse, out);
             out.flush();
             remote.close();
             System.out.println("Disconnection, wait an other connection...");
@@ -81,9 +86,6 @@ public class WebServer {
      * @throws Exception if an exception is raised during the treatment
      */
     public static void treatRequest(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        httpResponse.setProtocolVersion("HTTP/1.0");
-        httpResponse.getHttpMessageHeader().addField(HttpResponseHeaderField.SERVER, "Bot");
-
         switch (httpRequest.getHttpMethod()) {
             case HEAD: { /* fall down */ }
             case GET: {
