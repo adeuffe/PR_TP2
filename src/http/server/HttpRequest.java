@@ -87,7 +87,7 @@ public class HttpRequest {
 
     @Override
     public String toString() {
-        return "{"
+        return this.getClass().getSimpleName() + "{"
                 + "httpMethod=" + this.httpMethod + ","
                 + "resource=" + this.resource + ","
                 + "protocolVersion=" + this.protocolVersion + ","

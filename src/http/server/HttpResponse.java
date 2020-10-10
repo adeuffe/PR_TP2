@@ -140,7 +140,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return "{"
+        return this.getClass().getSimpleName() + "{"
                 + "protocolVersion=" + this.protocolVersion + ","
                 + "statusCode=" + this.statusCode + ","
                 + "reasonPhrase=" + this.reasonPhrase + ","

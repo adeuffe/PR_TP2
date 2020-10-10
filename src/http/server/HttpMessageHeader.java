@@ -143,7 +143,8 @@ public class HttpMessageHeader {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "{"
-                + "fields=" + this.fields
+                + "fields=" + this.fields + ","
+                + "httpMessageType=" + this.httpMessageType
                 + "}";
     }
 }
