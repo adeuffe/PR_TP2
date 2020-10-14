@@ -1,5 +1,9 @@
 package http.server.exceptions;
 
+/**
+ * Exception raised when a bad request HTTP error is detected
+ *
+ */
 public class HttpBadRequestException extends Exception {
 
     public HttpBadRequestException() {

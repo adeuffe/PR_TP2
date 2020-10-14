@@ -21,7 +21,7 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final String resource;
-    private final Map<String, String> parameters = new HashMap<>();
+    private String queryString = "";
     private final String protocolVersion;
     private final HttpMessageHeader header;
     private final String content;
@@ -47,7 +47,7 @@ public class HttpRequest {
                 Matcher matcher2 = pattern2.matcher(resource);
                 if (matcher2.find()) {
                     resource = matcher2.group(1);
-                    this.addParameters(matcher2.group(2));
+                    this.queryString = matcher2.group(2);
                 }
             }
             this.resource = resource;
@@ -78,34 +78,12 @@ public class HttpRequest {
     }
 
     /**
-     * Returns a copy of the parameters of the HTTP request
+     * Returns the query string of the HTTP request
      *
-     * @return a copy of the parameters of the HTTP request
+     * @return the query string of the HTTP request
      */
-    public Map<String, String> getParameters() {
-        return new HashMap<>(this.parameters);
-    }
-
-    /**
-     * Adds parameters of the specified query string. The method is simplify and doesn't reflect the complete
-     * reel behavior
-     *
-     * @param queryString the query string
-     * @throws HttpBadRequestException if the query string has invalid format
-     */
-    private void addParameters(String queryString) throws HttpBadRequestException {
-        String[] parameters = queryString.split("&");
-        for (String parameter : parameters) {
-            Pattern pattern = Pattern.compile("^([\\w.~+-]+)=([\\w.~+-]+)$");
-            Matcher matcher = pattern.matcher(parameter);
-            if (matcher.find()) {
-                String key = matcher.group(1).replaceAll("\\+", " ");
-                String value = matcher.group(2).replaceAll("\\+", " ");
-                this.parameters.put(key, value);
-            } else {
-                throw new HttpBadRequestException("The query string is malformed for the parameter: " + parameter);
-            }
-        }
+    public String getQueryString() {
+        return this.queryString;
     }
 
     /**
@@ -140,7 +118,7 @@ public class HttpRequest {
         return this.getClass().getSimpleName() + "{"
                 + "httpMethod=" + this.httpMethod + ","
                 + "resource=" + this.resource + ","
-                + "parameters=" + this.parameters + ","
+                + "queryString=" + this.queryString + ","
                 + "protocolVersion=" + this.protocolVersion + ","
                 + "header=" + this.header + ","
                 + "content=" + this.content

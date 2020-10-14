@@ -1,16 +1,16 @@
 package http.server;
 
 import http.server.exceptions.HttpBadRequestException;
+import http.server.exceptions.HttpForbiddenException;
+import http.server.exceptions.HttpIllegalResourceException;
+import http.server.exceptions.HttpTeapotException;
 import http.server.request.HttpRequest;
 import http.server.request.HttpRequestBuilder;
 import http.server.response.HttpResponse;
 import http.server.response.HttpResponseBuilder;
 import http.server.response.HttpResponseHeaderField;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -74,6 +74,15 @@ public class WebServer {
                     if (httpRequest != null) {
                         treatRequest(httpRequest, httpResponse);
                     }
+                } catch (HttpForbiddenException e) {
+                    e.printStackTrace();
+                    httpResponse.setStatusCode(403);
+                } catch (HttpIllegalResourceException e) {
+                    e.printStackTrace();
+                    httpResponse.setStatusCode(451);
+                } catch (HttpTeapotException e) {
+                    e.printStackTrace();
+                    httpResponse.setStatusCode(418);
                 } catch (HttpBadRequestException | IllegalStateException e) {
                     e.printStackTrace();
                     httpResponse.setStatusCode(400);
@@ -102,17 +111,29 @@ public class WebServer {
      * @throws Exception if an exception is raised during the treatment
      */
     public static void treatRequest(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        checkResource(httpRequest.getResource());
         switch (httpRequest.getHttpMethod()) {
             case HEAD: { /* fall down */ }
             case GET: {
                 if (ResourceManager.isResourceExists(httpRequest.getResource())) {
-                    byte[] content = ResourceManager.readResource(httpRequest.getResource());
-                    String contentType = HttpResponseBuilder.getContentType(httpRequest.getResource());
-                    if (contentType != null) {
-                        httpResponse.setStatusCode(200);
-                        httpResponse.setContent(content, contentType);
+                    if (!ResourceManager.isDynamicResource(httpRequest.getResource())) {
+                        byte[] content = ResourceManager.readResource(httpRequest.getResource());
+                        String contentType = HttpResponseBuilder.getContentType(httpRequest.getResource());
+                        if (contentType != null) {
+                            httpResponse.setStatusCode(200);
+                            httpResponse.setContent(content, contentType);
+                        } else {
+                            httpResponse.setStatusCode(415);
+                        }
                     } else {
-                        httpResponse.setStatusCode(415);
+                        String extension = ResourceManager.getFileExtension(httpRequest.getResource());
+                        if (extension.equalsIgnoreCase("py")) {
+                            byte[] content = executeDynamicResource(httpRequest.getResource(), httpRequest.getQueryString()).getBytes();
+                            httpResponse.setStatusCode(200);
+                            httpResponse.setContent(content, "text/html");
+                        } else {
+                            httpResponse.setStatusCode(415);
+                        }
                     }
                 } else {
                     httpResponse.setStatusCode(404);
@@ -157,6 +178,48 @@ public class WebServer {
 
         if (httpRequest.getHttpMethod() == HttpMethod.HEAD) {
             httpResponse.removeContentOnly();
+        }
+    }
+
+    /**
+     * Executes a dynamic resource by creating a new process
+     *
+     * @param resource the dynamic resource
+     * @param queryString teh query string to pass to the dynamic resource for it execution
+     * @return the result of the execution of the dynamic resource
+     * @throws IOException if an I/O exception is raised
+     */
+    public static String executeDynamicResource(String resource, String queryString) throws IOException {
+        Process process = Runtime.getRuntime().exec("python " + ResourceManager.getResourcePath(resource).toString() + " " + queryString);
+        BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        StringBuilder res = new StringBuilder();
+        String line = in.readLine();
+        while (line != null) {
+            res.append(line);
+            line = in.readLine();
+        }
+        return res.toString();
+    }
+
+    /**
+     * Checks the resource of the HTTP request and raise an exception if the file is unavailable
+     *
+     * @param resource the targeted resource by the HTTP request
+     * @throws HttpIllegalResourceException if the resource is unavailable for legal reasons
+     * @throws HttpForbiddenException if the resource is forbidden
+     * @throws HttpTeapotException teapot easter egg
+     */
+    public static void checkResource(String resource) throws HttpIllegalResourceException, HttpForbiddenException, HttpTeapotException {
+        File resourceFile = new File("resources/" + resource);
+        File illegalFile = new File("resources/illegal.html");
+        File privateFile = new File("resources/private.html");
+        File teapotFile = new File("resources/teapot");
+        if (resourceFile.compareTo(illegalFile) == 0) {
+            throw new HttpIllegalResourceException();
+        } else if (resourceFile.compareTo(privateFile) == 0) {
+            throw new HttpForbiddenException();
+        } else if (resourceFile.compareTo(teapotFile) == 0) {
+            throw new HttpTeapotException();
         }
     }
 

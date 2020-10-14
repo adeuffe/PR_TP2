@@ -44,6 +44,31 @@ public class ResourceManager {
     }
 
     /**
+     * Returns "true" if the specified resource is dynamic, "false" otherwise
+     *
+     * @param resource the targeted resource
+     * @return "true" if the specified resource is dynamic, "false" otherwise
+     */
+    public static boolean isDynamicResource(String resource) {
+        boolean isDynamicResource = false;
+        if (isResourceExists(resource)) {
+            Path path = getResourcePath(resource);
+            isDynamicResource = path.startsWith(getResourcePath("dynamicFolder"));
+        }
+        return isDynamicResource;
+    }
+
+    /**
+     * Gets and returns the file extension of the specified resource
+     *
+     * @param resource the targeted resource
+     * @return the extension of the specified file resource
+     */
+    public static String getFileExtension(String resource) {
+        return resource.substring(resource.indexOf(".") + 1);
+    }
+
+    /**
      * Reads and returns the content of the specified resource
      *
      * @param resource the resource path relative to the resources directory of this HTTP server

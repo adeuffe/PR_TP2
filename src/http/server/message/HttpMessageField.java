@@ -1,7 +1,7 @@
 package http.server.message;
 
 /**
- * The class represents the interface of header field of HTTP message (request & response)
+ * The class represents the interface of header field of HTTP message (request and response)
  *
  * @author Loïc DUBOIS-TERMOZ
  * @author Alexandre DUFOUR

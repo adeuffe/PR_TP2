@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The class represents the header section of an HTTP message (request & response)
+ * The class represents the header section of an HTTP message (request and response)
  *
  * @author Loïc DUBOIS-TERMOZ
  * @author Alexandre DUFOUR

@@ -1,5 +1,7 @@
 package http.server.response;
 
+import http.server.ResourceManager;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,7 +115,7 @@ public class HttpResponseBuilder {
      * @return the content type of the specified resource
      */
     public static String getContentType(String resource) {
-        String extension = resource.substring(resource.indexOf(".") + 1);
+        String extension = ResourceManager.getFileExtension(resource);
         String contentType = null;
         if (MIME.containsKey(extension)) {
             contentType = MIME.get(extension);
