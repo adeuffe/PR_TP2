@@ -1,4 +1,4 @@
-package http.server;
+package http.server.message;
 
 /**
  * This enum represents the HTTP message types

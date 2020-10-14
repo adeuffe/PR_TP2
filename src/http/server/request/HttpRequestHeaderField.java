@@ -1,4 +1,6 @@
-package http.server;
+package http.server.request;
+
+import http.server.message.HttpMessageField;
 
 /**
  * This enum represents the list of header fields for an HTTP request

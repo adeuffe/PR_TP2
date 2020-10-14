@@ -1,4 +1,8 @@
-package http.server;
+package http.server.message;
+
+import http.server.exceptions.HttpBadRequestException;
+import http.server.request.HttpRequestHeaderField;
+import http.server.response.HttpResponseHeaderField;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +38,9 @@ public class HttpMessageHeader {
      *
      * @param fieldsLines     the fields lines where each field line must have the format (.*): (.*) to be valid
      * @param httpMessageType the HTTP message type (RESPONSE or REQUEST) associated with this header
-     * @throws Exception if the field is invalid (wrong format or unknown field)
+     * @throws HttpBadRequestException if the field is invalid (wrong format or unknown field)
      */
-    public HttpMessageHeader(List<String> fieldsLines, HttpMessageType httpMessageType) throws Exception {
+    public HttpMessageHeader(List<String> fieldsLines, HttpMessageType httpMessageType) throws HttpBadRequestException {
         this(httpMessageType);
         for (String fieldLine : fieldsLines) {
             try {
@@ -50,7 +54,8 @@ public class HttpMessageHeader {
                     throw new IllegalStateException();
                 }
             } catch (IllegalStateException e) {
-                throw new IllegalStateException("The field \"" + fieldLine + "\" is an invalid header field format", e);
+                e.printStackTrace();
+                throw new HttpBadRequestException("The field \"" + fieldLine + "\" is an invalid header field format");
             }
         }
     }
@@ -110,9 +115,9 @@ public class HttpMessageHeader {
      *
      * @param key   the key of the field to add to this header
      * @param value the value of the field to add to this header
-     * @throws Exception if the field key is unknown for the server
+     * @throws HttpBadRequestException if the field key is unknown for the server
      */
-    public void addField(String key, String value) throws Exception {
+    public void addField(String key, String value) throws HttpBadRequestException {
         HttpMessageField httpMessageType;
         if (this.httpMessageType == HttpMessageType.REQUEST) {
             httpMessageType = HttpRequestHeaderField.getFieldFromName(key);
@@ -120,7 +125,7 @@ public class HttpMessageHeader {
             httpMessageType = HttpResponseHeaderField.getFieldFromName(key);
         }
         if (httpMessageType == null) {
-            throw new Exception("Unknown field key: " + key);
+            throw new HttpBadRequestException("Unknown field key: " + key);
         }
         this.fields.put(httpMessageType.getFieldName(), value);
     }

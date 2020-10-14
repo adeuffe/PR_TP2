@@ -1,4 +1,4 @@
-package http.server;
+package http.server.message;
 
 /**
  * The class represents the interface of header field of HTTP message (request & response)

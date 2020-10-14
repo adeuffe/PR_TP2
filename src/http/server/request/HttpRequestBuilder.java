@@ -1,6 +1,9 @@
-package http.server;
+package http.server.request;
+
+import http.server.exceptions.HttpBadRequestException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,14 +22,14 @@ public class HttpRequestBuilder {
      *
      * @param in the reader of the input of the HTTP socket server
      * @return a list of strings where each of them represents a line of the HTTP request
-     * @throws Exception if I/O exception or the HTTP request received is invalid
+     * @throws IOException if I/O exception or the HTTP request received is invalid
      */
-    public static List<String> readRequest(BufferedReader in) throws Exception {
+    public static List<String> readRequest(BufferedReader in) throws IOException {
         List<String> requestStr = new ArrayList<>();
         String line = in.readLine();
         int length = 0;
         while (line != null && !line.equals("")) {
-            Pattern pattern = Pattern.compile("(.*): (.*)");
+            Pattern pattern = Pattern.compile("(.+): (.+)");
             Matcher matcher = pattern.matcher(line);
             if (matcher.find() && matcher.group(1).equalsIgnoreCase("Content-Length")) {
                 length = Integer.parseInt(matcher.group(2));
@@ -49,9 +52,9 @@ public class HttpRequestBuilder {
      *
      * @param requestStr the string form of the HTTP request to build
      * @return the HTTP request built from the specified string form
-     * @throws Exception if the string form is invalid
+     * @throws HttpBadRequestException if the request is not understandable by the HTTP server
      */
-    public static HttpRequest buildRequest(List<String> requestStr) throws Exception {
+    public static HttpRequest buildRequest(List<String> requestStr) throws HttpBadRequestException {
         if (requestStr.isEmpty()) {
             return null;
         }

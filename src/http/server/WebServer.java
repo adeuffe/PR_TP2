@@ -1,5 +1,12 @@
 package http.server;
 
+import http.server.exceptions.HttpBadRequestException;
+import http.server.request.HttpRequest;
+import http.server.request.HttpRequestBuilder;
+import http.server.response.HttpResponse;
+import http.server.response.HttpResponseBuilder;
+import http.server.response.HttpResponseHeaderField;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +22,8 @@ import java.util.List;
  * @author Alexandre DUFOUR
  */
 public class WebServer {
+
+    public static final boolean MAINTENANCE = false;
 
     /**
      * WebServer constructor
@@ -56,17 +65,24 @@ public class WebServer {
             httpResponse.setStatusCode(500);
             httpResponse.setProtocolVersion("HTTP/1.0");
             httpResponse.getHttpMessageHeader().addField(HttpResponseHeaderField.SERVER, "Bot");
-            try {
-                List<String> requestStr = HttpRequestBuilder.readRequest(in);
-                HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
-                System.out.println(httpRequest);
+            if (!MAINTENANCE) {
+                try {
+                    List<String> requestStr = HttpRequestBuilder.readRequest(in);
+                    HttpRequest httpRequest = HttpRequestBuilder.buildRequest(requestStr);
+                    System.out.println(httpRequest);
 
-                if (httpRequest != null) {
-                    treatRequest(httpRequest, httpResponse);
+                    if (httpRequest != null) {
+                        treatRequest(httpRequest, httpResponse);
+                    }
+                } catch (HttpBadRequestException | IllegalStateException e) {
+                    e.printStackTrace();
+                    httpResponse.setStatusCode(400);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    httpResponse.setStatusCode(500);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                httpResponse.setStatusCode(500);
+            } else {
+                httpResponse.setStatusCode(503);
             }
             sendResponse(httpResponse, out);
             out.flush();
@@ -128,6 +144,13 @@ public class WebServer {
                 } else {
                     httpResponse.setStatusCode(404);
                 }
+                break;
+            }
+            case TRACE: { /* fall down */ }
+            case OPTIONS: { /* fall down */ }
+            case CONNECT: { /* fall down */ }
+            case PATCH: {
+                httpResponse.setStatusCode(501);
                 break;
             }
         }

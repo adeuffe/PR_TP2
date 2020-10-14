@@ -1,4 +1,8 @@
-package http.server;
+package http.server.response;
+
+import http.server.message.HttpMessageField;
+import http.server.message.HttpMessageHeader;
+import http.server.message.HttpMessageType;
 
 /**
  * This class represents an HTTP response

@@ -1,6 +1,13 @@
-package http.server;
+package http.server.request;
 
+import http.server.HttpMethod;
+import http.server.exceptions.HttpBadRequestException;
+import http.server.message.HttpMessageHeader;
+import http.server.message.HttpMessageType;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +21,7 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final String resource;
+    private final Map<String, String> parameters = new HashMap<>();
     private final String protocolVersion;
     private final HttpMessageHeader header;
     private final String content;
@@ -24,23 +32,30 @@ public class HttpRequest {
      * @param requestLine   the request line that correspond to the first line of the HTTP request
      * @param requestHeader the header section of the HTTP request
      * @param requestBody   the body section of the HTTP request
-     * @throws Exception if there's something wrong with general header or header section
+     * @throws HttpBadRequestException if there's something wrong with general header or header section
      */
-    public HttpRequest(String requestLine, List<String> requestHeader, String requestBody) throws Exception {
-        Pattern pattern = Pattern.compile("([A-Z]*) (.*) (.*)");
+    public HttpRequest(String requestLine, List<String> requestHeader, String requestBody) throws HttpBadRequestException {
+        Pattern pattern = Pattern.compile("([A-Z]+) (.+) (.+)");
         Matcher matcher = pattern.matcher(requestLine);
         if (matcher.find()) {
             httpMethod = HttpMethod.valueOf(matcher.group(1));
             String resource = matcher.group(2);
             if (resource.equalsIgnoreCase("/")) {
                 resource += "index.html";
+            } else {
+                Pattern pattern2 = Pattern.compile("(.+)\\?(.+)");
+                Matcher matcher2 = pattern2.matcher(resource);
+                if (matcher2.find()) {
+                    resource = matcher2.group(1);
+                    this.addParameters(matcher2.group(2));
+                }
             }
             this.resource = resource;
             protocolVersion = matcher.group(3);
             header = new HttpMessageHeader(requestHeader, HttpMessageType.REQUEST);
             content = requestBody;
         } else {
-            throw new IllegalStateException();
+            throw new HttpBadRequestException("The request line has an invalid format: " + requestLine);
         }
     }
 
@@ -60,6 +75,37 @@ public class HttpRequest {
      */
     public String getResource() {
         return resource;
+    }
+
+    /**
+     * Returns a copy of the parameters of the HTTP request
+     *
+     * @return a copy of the parameters of the HTTP request
+     */
+    public Map<String, String> getParameters() {
+        return new HashMap<>(this.parameters);
+    }
+
+    /**
+     * Adds parameters of the specified query string. The method is simplify and doesn't reflect the complete
+     * reel behavior
+     *
+     * @param queryString the query string
+     * @throws HttpBadRequestException if the query string has invalid format
+     */
+    private void addParameters(String queryString) throws HttpBadRequestException {
+        String[] parameters = queryString.split("&");
+        for (String parameter : parameters) {
+            Pattern pattern = Pattern.compile("^([\\w.~+-]+)=([\\w.~+-]+)$");
+            Matcher matcher = pattern.matcher(parameter);
+            if (matcher.find()) {
+                String key = matcher.group(1).replaceAll("\\+", " ");
+                String value = matcher.group(2).replaceAll("\\+", " ");
+                this.parameters.put(key, value);
+            } else {
+                throw new HttpBadRequestException("The query string is malformed for the parameter: " + parameter);
+            }
+        }
     }
 
     /**
@@ -94,6 +140,7 @@ public class HttpRequest {
         return this.getClass().getSimpleName() + "{"
                 + "httpMethod=" + this.httpMethod + ","
                 + "resource=" + this.resource + ","
+                + "parameters=" + this.parameters + ","
                 + "protocolVersion=" + this.protocolVersion + ","
                 + "header=" + this.header + ","
                 + "content=" + this.content
